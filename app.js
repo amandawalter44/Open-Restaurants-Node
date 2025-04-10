@@ -40,11 +40,10 @@ function isWithinHours(datetimeStr, hoursStr) {
   if (isNaN(dt)) return false;
 
   // Extract day and time
-  const day = dt.toLocaleString("en-US", { weekday: "short", timeZone: "UTC" }); // "Mon", "Tue", etc.
+  const day = dt.toLocaleString("en-US", { weekday: "short", timeZone: "UTC" });
   const hour = dt.getUTCHours();
   const minute = dt.getUTCMinutes();
 
-  console.log("HOUR", hour);
   // Check if day is in range
   const [days, timeRange] = hoursStr.split(" ");
   const [dayStart, dayEnd] = days.split("-");

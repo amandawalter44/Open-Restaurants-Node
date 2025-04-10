@@ -52,14 +52,12 @@ describe("GET /restaurants/:openTime", () => {
     it("sends error when only a time is passed", async () => {
       const expected = "Invalid date format";
       const response = await request(app).get("/restaurants/10:00:00");
-      console.log("RESPONSE", response);
       expect(response.statusCode).toBe(400);
       expect(response.text).toBe(expected);
     });
     it("sends error no value passed in openTime", async () => {
       const expected = "Invalid date format";
       const response = await request(app).get("/restaurants/'");
-      console.log("RESPONSE", response);
       expect(response.statusCode).toBe(400);
       expect(response.text).toBe(expected);
     });

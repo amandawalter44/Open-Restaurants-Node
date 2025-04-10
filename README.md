@@ -6,3 +6,7 @@ To run locally:
 
 1.  First, run `npm run build` to build the docker image
 2.  Run `npm run dev-start` to run the application
+
+To run tests:
+
+1. Run `npm run test`
