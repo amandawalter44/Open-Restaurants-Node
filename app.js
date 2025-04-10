@@ -2,27 +2,29 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
+// Get Restaurants Open at a given Date and Time
+// Time will default to 00:00 if no specific time given
 app.get("/restaurants/:openTime", (req, res) => {
   const results = [];
   const filePath = path.join(__dirname, "restaurants.csv");
 
   const dateStr = req.params.openTime;
   const parsedDate = new Date(dateStr);
-
   if (isNaN(parsedDate)) {
     return res.status(400).send("Invalid date format");
   }
-
-  //   res.json({ parsedDate });
   fs.createReadStream(filePath)
     .pipe(csv())
     .on("data", (data) => results.push(data))
     .on("end", () => {
       const filteredResults = results.filter((restaurant) => {
-        console.log("RESTAURANT", restaurant);
         return isWithinHours(parsedDate, restaurant.Hours);
       });
       res.json(filteredResults);
@@ -33,7 +35,7 @@ app.get("/restaurants/:openTime", (req, res) => {
     });
 });
 
-function isWithinHours(datetimeStr, hoursStr = "Mon-Sun 11 am - 9:30 pm") {
+function isWithinHours(datetimeStr, hoursStr) {
   const dt = new Date(datetimeStr);
   if (isNaN(dt)) return false;
 
@@ -42,6 +44,7 @@ function isWithinHours(datetimeStr, hoursStr = "Mon-Sun 11 am - 9:30 pm") {
   const hour = dt.getUTCHours();
   const minute = dt.getUTCMinutes();
 
+  console.log("HOUR", hour);
   // Check if day is in range
   const [days, timeRange] = hoursStr.split(" ");
   const [dayStart, dayEnd] = days.split("-");
@@ -67,12 +70,12 @@ function isWithinHours(datetimeStr, hoursStr = "Mon-Sun 11 am - 9:30 pm") {
       .toLowerCase()
       .split(/(am|pm)/)
       .filter(Boolean);
-    let [h, m = "00"] = time.split(":");
-    h = parseInt(h, 10);
-    m = parseInt(m, 10);
-    if (modifier === "pm" && h !== 12) h += 12;
-    if (modifier === "am" && h === 12) h = 0;
-    return h * 60 + m;
+    let [hours, minutes = "00"] = time.split(":");
+    hours = parseInt(hours, 10);
+    minutes = parseInt(minutes, 10);
+    if (modifier === "pm" && hours !== 12) hours += 12;
+    if (modifier === "am" && hours === 12) hours = 0;
+    return hours * 60 + minutes;
   };
 
   const timeNow = hour * 60 + minute;
@@ -81,3 +84,5 @@ function isWithinHours(datetimeStr, hoursStr = "Mon-Sun 11 am - 9:30 pm") {
 
   return timeNow >= startTime && timeNow <= endTime;
 }
+
+export default app;
